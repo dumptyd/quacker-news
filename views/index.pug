@@ -9,5 +9,28 @@ html.no-js(lang='')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet', href='/css/main.css')
   body
-    .container
-      | Hello World!
+    .container.padtop
+      .blue.header
+        .bold.inline HN Clone
+        .padleft.inline
+          a.padleft.padright(href='#') new
+          |  |
+          a.padleft.padright(href='#') comments
+          |  |
+          a.padleft.padright(href='#') show
+          |  |
+          a.padleft.padright(href='#') ask
+          |  |
+          a.padleft.padright(href='/submit') submit
+        .padright.inline.pull-right
+          if authenticated==true
+            a.padleft.padright(href='/user/'+user) #{user}
+            |  |
+            a.padleft.padright(href='/logout') logout
+          else
+            a.padleft.padright(href='/login') login
+      .grey.posts
+        each post in posts
+          a(href=post.url).bold #{post.title}
+          .info.small.gray-font #{post.upvotes.length} points by #{post.author.local.username}
+                

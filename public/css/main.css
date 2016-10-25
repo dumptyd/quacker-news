@@ -1,0 +1,50 @@
+.blue {
+  background-color: #64B2F6;
+  padding: 5px 10px;
+}
+
+.grey {
+  background-color: #F6F6EF;
+}
+
+.gray-font{
+  color:#444;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.inline {
+  display: inline-block;
+}
+
+.padleft {
+  padding-left: 5px;
+}
+
+.padright {
+  padding-right: 5px;
+}
+
+.padtop {
+  padding-top: 5px;
+}
+
+.padbottom {
+  padding-bottom: 5px;
+}
+
+.blue>.padleft>a,
+.blue>.pull-right>a, a {
+  color: #000;
+}
+
+.posts {
+  padding: 20px;
+}
+
+table {
+  border-spacing: 10px;
+  border-collapse: separate;
+}

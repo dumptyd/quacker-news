@@ -15,7 +15,7 @@ var threadsSchema = mongoose.Schema({
   title: String,
   text: String,
   url: String,
-  type:{type:String,enum:['ask','link']}
+  type:{type:String,enum:['ask','show','link']}
 }, {
   timestamps: true
 });

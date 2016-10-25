@@ -12,19 +12,13 @@ module.exports = function (passport) {
   passport.use('local-signup', new LocalStrategy({
     passReqToCallback: true
   }, function (req, username, password, done) {
-    if (username === '' || password === '') return done(null, false, {
-      'signupMessage': 'Username and password can\'t be empty.',
-      'type': 'error'
-    });
+    if (username === '' || password === '') return done(null, false, req.flash('message', 'Username and password can\'t be empty.'));
     User.findOne({
       'local.username': username
     }, function (err, user) {
       if (err) return done(err);
       if (user) {
-        return done(null, false, {
-          'signupMessage': 'That username is already taken.',
-          'type': 'error'
-        });
+        return done(null, false, req.flash('message', 'That username is already taken.'));
       }
       else {
         var newUser = new User();
@@ -32,10 +26,7 @@ module.exports = function (passport) {
         newUser.local.password = newUser.generateHash(password);
         newUser.save(function (err) {
           if (err) throw err;
-          return done(null, newUser, {
-            'signupMessage': 'Signed up successfully. You can now login.',
-            'type': 'success'
-          });
+          return done(null, newUser, req.flash('message','Signed up successfully. You can now login.'));
         });
       }
     });
@@ -47,18 +38,9 @@ module.exports = function (passport) {
       'local.username': username
     }, function (err, user) {
       if (err) return done(err);
-      if (!user) return done(null, false, {
-        'loginMessage': 'No user found.',
-        type: 'error'
-      });
-      if (!user.validPassword(password)) return done(null, false, {
-        'loginMessage': 'Oops! Wrong password.',
-        type: 'error'
-      });
-      return done(null, user, {
-        'location': '/profile',
-        type: 'success'
-      });
+      if (!user) return done(null, false, req.flash('message', 'No user found.'));
+      if (!user.validPassword(password)) return done(null, false, req.flash('message', 'Oops! Wrong password.'));
+      return done(null, user);
     });
   }));
 };

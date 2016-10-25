@@ -1,0 +1,46 @@
+doctype html
+html.no-js(lang='')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='x-ua-compatible', content='ie=edge')
+    title HN clone
+    meta(name='description', content='A basic hackernews clone')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/css/main.css')
+  body.padleft
+    if message&&message.length
+      span.bold.small #{message}
+    br
+    b Login
+    br
+    br
+    form(method='post', action='login')
+      table(border='0')
+        tr
+          td username:
+          td
+            input(type='text', name='username', size='20', autocorrect='off', spellcheck='false', autocapitalize='off', autofocus='true')
+        tr
+          td password:
+          td
+            input(type='password', name='password', size='20')
+      br
+      input(type='submit', value='login')
+    br
+    br
+    b Create Account
+    br
+    br
+    form(method='post', action='/signup')
+      table(border='0')
+        tr
+          td username:
+          td
+            input(type='text', name='username', size='20', autocorrect='off', spellcheck='false', autocapitalize='off')
+        tr
+          td password:
+          td
+            input(type='password', name='password', size='20')
+      br
+      input(type='submit', value='create account')
