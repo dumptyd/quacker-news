@@ -1,0 +1,53 @@
+
+doctype html
+html.no-js(lang='')
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='x-ua-compatible', content='ie=edge')
+    title HN clone
+    meta(name='description', content='A basic hackernews clone')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
+    link(rel='stylesheet', href='/css/main.css')
+  body
+    .container.padtop
+      .blue.header
+        .bold.inline HN Clone
+        .padleft.inline
+          a.padleft.padright(href='/new') new
+          |  |
+          a.padleft.padright(href='/comments') comments
+          |  |
+          a.padleft.padright(href='/show') show
+          |  |
+          a.padleft.padright(href='/ask') ask
+          |  |
+          a.padleft.padright(href='/submit') submit
+        .padright.inline.pull-right
+          if authenticated==true
+            a.padleft.padright(href='/user/'+user) #{user}
+            |  |
+            a.padleft.padright(href='/logout') logout
+          else
+            a.padleft.padright(href='/login') login
+      .grey.posts
+        div.padbottom
+          a(href=thread.url||'/thread/'+thread._id) #{thread.title}
+          .info.small.gray-font #{thread.upvotes.length} points by #{thread.author.local.username} | 
+            a(href='/thread/'+thread._id).gray-font #{thread.comments.length} comments
+          if thread.text && thread.type!='link'
+            div.padtop.gray-font !{thread.text.replace(/\n/g, '<br>')}
+        form(action='/thread/'+thread._id, method='post').padtop
+          textarea(name='text' rows='4' cols='70')
+          br
+          input(type='submit', value='add comment').margintop-lg
+        .comments.margintop-slg
+          each comment in thread.comments
+            .comment.margintop-lg
+              a(href='',title='upvote').small.gray-font &#9650;
+              a(href='/user/'+comment.author.local.username).gray-font.small.marginleft #{comment.author.local.username}
+              span.small.gray-font  #{moment(comment.createdAt).fromNow()}
+              br
+              a(href='',title='upvote').small.gray-font &#9660;
+              span.marginleft #{comment.text}
+                

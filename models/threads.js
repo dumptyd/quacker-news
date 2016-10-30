@@ -12,10 +12,25 @@ var threadsSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Users'
   }],
+  upvoteCount: {
+    type: Number,
+    default: 0
+  },
+  downvoteCount: {
+    type: Number,
+    default: 0
+  },
+  comments: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Comments'
+  }],
   title: String,
   text: String,
   url: String,
-  type:{type:String,enum:['ask','show','link']}
+  type: {
+    type: String,
+    enum: ['ask', 'show', 'link']
+  }
 }, {
   timestamps: true
 });

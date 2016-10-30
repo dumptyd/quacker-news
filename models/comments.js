@@ -12,6 +12,18 @@ var commentsSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Users'
   }],
+  upvoteCount: {
+    type: Number,
+    default: 0
+  },
+  downvoteCount: {
+    type: Number,
+    default: 0
+  },
+  thread: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Threads'
+  },
   text: String,
 }, {
   timestamps: true

@@ -13,6 +13,8 @@ html.no-js(lang='')
       .blue.header
         .bold.inline Submit
       .grey.posts
+        if message&&message.length
+          span.bold.small #{message}
         form(action='/submit', method='post')
           table(border='0')
             tr
