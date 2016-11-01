@@ -32,11 +32,14 @@ html.no-js(lang='')
       .grey.posts
         each post in posts
           div.padbottom
-            a(href=post.url||'/thread/'+post._id) #{post.title}
+            a(href='',title='upvote').small.gray-font &#9650;
+            a(href=post.url||'/thread/'+post._id).marginleft #{post.title}
             if post.url
               span.gray-font.small  
                 a.small.gray-font (#{node_url.parse(post.url).hostname})
-            .info.small.gray-font 
+            br
+            a(href='',title='upvote').small.gray-font &#9660;
+            span.info.gray-font.marginleft.small 
               span.small #{post.upvotes.length} points by #{post.author.local.username} #{moment(post.createdAt).fromNow()} | 
               a(href='/thread/'+post._id).gray-font.small #{post.comments.length} comments
                 

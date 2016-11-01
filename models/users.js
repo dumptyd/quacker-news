@@ -5,7 +5,10 @@ var userSchema = mongoose.Schema({
     username: String,
     password: String,
   },
-  karma: Number,
+  karma: {
+    type: Number,
+    default: 0
+  },
   about: String,
   comments: [{
     type: mongoose.Schema.Types.ObjectId,

@@ -44,7 +44,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 //----------------------------routes----------------------------//
 app.get('/new', function (req, res) {
   console.log(req.isAuthenticated());
-  let query = Thread.find({type:'link'}).populate('author').sort('-createdAt').limit(30);
+  let query = Thread.find({
+    type: 'link'
+  }).populate('author').sort('-createdAt').limit(30);
   query.exec((err, posts) => {
     if (err) return res.end(500);
     let username;
@@ -59,7 +61,9 @@ app.get('/new', function (req, res) {
 });
 app.get('/show', function (req, res) {
   console.log(req.isAuthenticated());
-  let query = Thread.find({type:'show'}).populate('author').sort('-upvoteCount').limit(30);
+  let query = Thread.find({
+    type: 'show'
+  }).populate('author').sort('-upvoteCount').limit(30);
   query.exec((err, posts) => {
     if (err) return res.end(500);
     let username;
@@ -74,7 +78,9 @@ app.get('/show', function (req, res) {
 });
 app.get('/ask', function (req, res) {
   console.log(req.isAuthenticated());
-  let query = Thread.find({type:'ask'}).populate('author').sort('-upvoteCount').limit(30);
+  let query = Thread.find({
+    type: 'ask'
+  }).populate('author').sort('-upvoteCount').limit(30);
   query.exec((err, posts) => {
     if (err) return res.end(500);
     let username;
@@ -89,7 +95,9 @@ app.get('/ask', function (req, res) {
 });
 app.get('/', function (req, res) {
   console.log(req.isAuthenticated());
-  let query = Thread.find({type:'link'}).populate('author').sort('-upvoteCount').limit(30);
+  let query = Thread.find({
+    type: 'link'
+  }).populate('author').sort('-upvoteCount').limit(30);
   query.exec((err, posts) => {
     if (err) return res.end(500);
     let username;
@@ -131,9 +139,10 @@ app.post('/submit', function (req, res) {
           req.flash('submitmsg', 'An error occured.');
           return res.redirect('/submit');
         }
-        res.redirect('/'); //+doc._id); 
+        res.redirect('/' + doc._id);
       });
-    } else if (req.body.text && req.body.text.length > 9) {
+    }
+    else if (req.body.text && req.body.text.length > 9) {
       let thread = new Thread({
         author: req.user._id,
         title: title,
@@ -146,14 +155,16 @@ app.post('/submit', function (req, res) {
           req.flash('submitmsg', 'An error occured.');
           return res.redirect('/submit');
         }
-        res.redirect('/'); //+doc._id);          
+        res.redirect('/' + doc._id);
       });
-    } else {
+    }
+    else {
       req.flash('submitmsg', 'URL field must contain a valid url. For text posts, text field must contain at least 10 characters.');
       res.redirect('/submit');
     }
-  } else {
-    req.flash('submitmsg', 'Title cannot be emoty.');
+  }
+  else {
+    req.flash('submitmsg', 'Title cannot be empty.');
     res.redirect('/submit');
   }
 });
@@ -192,9 +203,7 @@ app.post('/thread/:id', function (req, res) {
     req.flash('message', 'You need to be logged in.');
     return res.redirect('/login');
   }
-  if (!text) {
-
-  }
+  if (!text) {}
   console.log(id, text);
   let comment = new Comment({
     author: req.user._id,
@@ -219,6 +228,18 @@ app.post('/login', passport.authenticate('local-login', {
   failureRedirect: '/login', // redirect back to the signup page if there is an error
   failureFlash: true // allow flash messages
 }));
+app.get('/user/:username', function (req, res) {
+  let username = req.params.username;
+  User.findOne({
+    'local.username': username
+  }).select('local.username karma about').exec(function (err, user) {
+    console.log(user);
+    if(user)
+      res.render('user',{user:user,authenticated:req.isAuthenticated()});
+    else
+      res.render('404');
+  });
+});
 //-----route registration-----//
 //route registration here
 //----------------------------//
