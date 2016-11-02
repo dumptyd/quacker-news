@@ -4,7 +4,7 @@ html.no-js(lang='')
   head
     meta(charset='utf-8')
     meta(http-equiv='x-ua-compatible', content='ie=edge')
-    title HN clone
+    title Profile: #{user.local.username} | Quacker News
     meta(name='description', content='A basic hackernews clone')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
@@ -12,7 +12,7 @@ html.no-js(lang='')
   body
     .container.padtop
       .blue.header
-        .bold.inline HN Clone
+        a(href='/').bold.inline Quacker News
         .padleft.inline
           a.padleft.padright(href='/new') new
           |  |
@@ -25,27 +25,59 @@ html.no-js(lang='')
           a.padleft.padright(href='/submit') submit
         .padright.inline.pull-right
           if authenticated==true
-            a.padleft.padright(href='/user/'+user) #{user}
+            a.padleft.padright(href='/user/'+user.local.username) #{user.local.username}
             |  |
             a.padleft.padright(href='/logout') logout
           else
             a.padleft.padright(href='/login') login
-      .grey.posts
-        table
-          tr
-            td username: 
-            td #{user.local.username}
-          tr
-            td karma:
-            td #{user.karma}
-          if user.about
+      .grey.posts.gray-font
+        if !thisuser
+          table
+            tr
+              td username: 
+              td #{user.local.username}
+            tr
+              td karma:
+              td #{user.karma}
+            tr
+              td created
+              td #{moment(user.createdAt).fromNow()}
             tr
               td about:
-              td #{user.about}
-          tr
-            td(colspan='2')
-              a(href='/'+user.local.username+'/comments') comments
-          tr
-            td(colspan='2')
-              a(href='/'+user.local.username+'/favorites') favorites
-                
+              td #{user.about||'<This user has no about me.>'}
+            tr
+              td
+              td
+                a(href='/'+user.local.username+'/comments').underline comments
+            tr
+              td
+              td
+                a(href='/'+user.local.username+'/favorites').underline favorites
+        else
+          form(action='/updateuser',method='POST')
+            table
+              tr
+                td username: 
+                td #{user.local.username}
+              tr
+                td karma:
+                td #{user.karma}
+              tr
+                td created
+                td #{moment(user.createdAt).fromNow()}
+              tr
+                td(style='vertical-align:top;') about:
+                td 
+                  textarea(cols='60', rows='4',name='about')
+                    | !{user.about||''}
+              tr
+                td
+                td
+                  a(href='/'+user.local.username+'/comments').underline comments
+              tr
+                td
+                td
+                  a(href='/'+user.local.username+'/favorites').underline favorites
+              tr
+                td
+                  input(type='submit',value='update').black

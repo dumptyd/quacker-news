@@ -43,7 +43,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 //routes go here
 //----------------------------routes----------------------------//
 app.get('/new', function (req, res) {
-  console.log(req.isAuthenticated());
+  //console.log(req.isAuthenticated());
   let query = Thread.find({
     type: 'link'
   }).populate('author').sort('-createdAt').limit(30);
@@ -60,7 +60,7 @@ app.get('/new', function (req, res) {
   });
 });
 app.get('/show', function (req, res) {
-  console.log(req.isAuthenticated());
+  //console.log(req.isAuthenticated());
   let query = Thread.find({
     type: 'show'
   }).populate('author').sort('-upvoteCount').limit(30);
@@ -77,7 +77,7 @@ app.get('/show', function (req, res) {
   });
 });
 app.get('/ask', function (req, res) {
-  console.log(req.isAuthenticated());
+  //console.log(req.isAuthenticated());
   let query = Thread.find({
     type: 'ask'
   }).populate('author').sort('-upvoteCount').limit(30);
@@ -94,7 +94,7 @@ app.get('/ask', function (req, res) {
   });
 });
 app.get('/', function (req, res) {
-  console.log(req.isAuthenticated());
+  //console.log(req.isAuthenticated());
   let query = Thread.find({
     type: 'link'
   }).populate('author').sort('-upvoteCount').limit(30);
@@ -126,7 +126,7 @@ app.post('/submit', function (req, res) {
   if (title.length) {
     if (req.body.url && req.body.url.length && /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/.test(req.body.url)) {
       let type = 'link';
-      if (title.startsWith('Show HNC:')) type = 'show';
+      if (title.startsWith('Show QN:')) type = 'show';
       let thread = new Thread({
         author: req.user._id,
         title: title,
@@ -141,8 +141,7 @@ app.post('/submit', function (req, res) {
         }
         res.redirect('/' + doc._id);
       });
-    }
-    else if (req.body.text && req.body.text.length > 9) {
+    } else if (req.body.text && req.body.text.length > 9) {
       let thread = new Thread({
         author: req.user._id,
         title: title,
@@ -157,13 +156,11 @@ app.post('/submit', function (req, res) {
         }
         res.redirect('/' + doc._id);
       });
-    }
-    else {
+    } else {
       req.flash('submitmsg', 'URL field must contain a valid url. For text posts, text field must contain at least 10 characters.');
       res.redirect('/submit');
     }
-  }
-  else {
+  } else {
     req.flash('submitmsg', 'Title cannot be empty.');
     res.redirect('/submit');
   }
@@ -232,12 +229,57 @@ app.get('/user/:username', function (req, res) {
   let username = req.params.username;
   User.findOne({
     'local.username': username
-  }).select('local.username karma about').exec(function (err, user) {
-    console.log(user);
-    if(user)
-      res.render('user',{user:user,authenticated:req.isAuthenticated()});
-    else
+  }).select('local.username karma about createdAt').exec(function (err, user) {
+    if (user) {
+      let thisuser = false;
+      if (req.user)
+        if (req.user.local.username === user.local.username)
+          thisuser = true;
+      res.render('user', {
+        user: user,
+        authenticated: req.isAuthenticated(),
+        thisuser: thisuser
+      });
+    } else
       res.render('404');
+  });
+});
+app.post('/updateuser', function (req, res) {
+  //console.log('hue',req.body.about);
+  if (typeof req.body.about === 'undefined' || !req.isAuthenticated()) {
+    if (req.user)
+      return res.redirect('/user/' + req.user.local.username);
+    else
+      return res.redirect('/');
+  }
+  let about = req.body.about;
+  User.findOne({
+    '_id': req.user._id
+  }).select('about').exec(function (err, user) {
+    if (user) {
+      user.about = about;
+      user.save(function (err, doc) {
+        return res.redirect('/user/' + req.user.local.username);
+      });
+    } else
+      res.redirect('/user/' + req.user.local.username);
+  });
+});
+app.get('/comments', function (req, res) {
+  let username;
+  if (req.user) username = req.user.local.username;
+  Comment.find({}).
+  limit(30).
+  select('author thread text createdAt upvoteCount downvoteCount').
+  populate('thread').
+  populate('author').
+  sort('-createdAt').
+  exec(function (err, comments) {
+    res.render('comment', {
+      authenticated: req.isAuthenticated(),
+      comments: comments,
+      user:username
+    });
   });
 });
 //-----route registration-----//

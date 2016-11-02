@@ -4,7 +4,7 @@ html.no-js(lang='')
   head
     meta(charset='utf-8')
     meta(http-equiv='x-ua-compatible', content='ie=edge')
-    title HN clone
+    title #{thread.title} | Quacker News
     meta(name='description', content='A basic hackernews clone')
     meta(name='viewport', content='width=device-width, initial-scale=1')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
@@ -12,7 +12,7 @@ html.no-js(lang='')
   body
     .container.padtop
       .blue.header
-        .bold.inline HN Clone
+        a(href='/').bold.inline Quacker News
         .padleft.inline
           a.padleft.padright(href='/new') new
           |  |
@@ -33,7 +33,9 @@ html.no-js(lang='')
       .grey.posts
         div.padbottom
           a(href=thread.url||'/thread/'+thread._id) #{thread.title}
-          .info.small.gray-font #{thread.upvotes.length} points by #{thread.author.local.username} | 
+          .info.small.gray-font #{thread.upvotes.length} points by 
+            a(href='/user/'+thread.author.local.username) #{thread.author.local.username} 
+            | |  
             a(href='/thread/'+thread._id).gray-font #{thread.comments.length} comments
           if thread.text && thread.type!='link'
             div.padtop.gray-font !{thread.text.replace(/\n/g, '<br>')}

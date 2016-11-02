@@ -30,17 +30,21 @@ html.no-js(lang='')
           else
             a.padleft.padright(href='/login') login
       .grey.posts
-        each post in posts
+        each comment in comments
           div.padbottom
-            a(href='',title='upvote').small.gray-font &#9650;
-            a(href=post.url||'/thread/'+post._id).marginleft #{post.title}
-            if post.url
-              span.gray-font.small  
-                a.small.gray-font (#{node_url.parse(post.url).hostname})
-            br
-            span.info.gray-font.small 
-              span.small #{post.upvotes.length} points by 
-                a(href='/user/'+post.author.local.username) #{post.author.local.username} 
-                | #{moment(post.createdAt).fromNow()} | 
-              a(href='/thread/'+post._id).gray-font.small #{post.comments.length} comments
+            table
+              tr
+                td(style='vertical-align:top;')
+                  a(href='',title='upvote').small.gray-font &#9650;
+                td
+                  span.gray-font #{comment.text}
+              tr
+                td(style='vertical-align:top;')
+                  a(href='',title='downvote').small.gray-font &#9660;
+                td
+                  span.info.gray-font.small 
+                    span.small #{comment.upvoteCount - comment.downvoteCount} points by 
+                  a(href='/user/'+comment.author.local.username) #{comment.author.local.username} 
+                  | #{moment(comment.createdAt).fromNow()} | 
+                  a(href='/thread/'+comment.thread._id).gray-font.small go to thread
                 
