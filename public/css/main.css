@@ -1,3 +1,7 @@
+body{
+  font-family: Verdana, Geneva, sans-serif;
+  font-size:10pt;
+}
 .blue {
   background-color: #64B2F6;
   padding: 5px 10px;
@@ -29,6 +33,10 @@
 
 .padtop {
   padding-top: 5px;
+}
+
+.margintop{
+  margin-top:5px;
 }
 
 .margintop-lg{
@@ -71,4 +79,7 @@ table {
 }
 .underline{
   text-decoration: underline;
+}
+.comment{
+  font-size:9pt;
 }

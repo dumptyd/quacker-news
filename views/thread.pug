@@ -32,24 +32,35 @@ html.no-js(lang='')
             a.padleft.padright(href='/login') login
       .grey.posts
         div.padbottom
-          a(href=thread.url||'/thread/'+thread._id) #{thread.title}
-          .info.small.gray-font #{thread.upvotes.length} points by 
-            a(href='/user/'+thread.author.local.username) #{thread.author.local.username} 
-            | |  
-            a(href='/thread/'+thread._id).gray-font #{thread.comments.length} comments
-          if thread.text && thread.type!='link'
-            div.padtop.gray-font !{thread.text.replace(/\n/g, '<br>')}
+          table
+            tr
+              td(style='vertical-align:top;').small.margintop
+                a(href='/vote?',title='upvote',style='display:block;').small.gray-font &#9650;
+                //a(href='',title='downvote').small.gray-font &#9660;
+              td
+                a(href=thread.url||'/thread/'+thread._id) #{thread.title}
+                if thread.url
+                    span.gray-font.small  
+                      a.small.gray-font (#{node_url.parse(thread.url).hostname})
+                .info.small.gray-font #{thread.upvotes.length} points by 
+                  a(href='/user/'+thread.author.local.username) #{thread.author.local.username}
+                  |  |  
+                  a(href='/thread/'+thread._id).gray-font #{thread.comments.length} comments
+                if thread.text && thread.type!='link'
+                  div.padtop.gray-font !{thread.text.replace(/\n/g, '<br>')}
         form(action='/thread/'+thread._id, method='post').padtop
           textarea(name='text' rows='4' cols='70')
           br
           input(type='submit', value='add comment').margintop-lg
         .comments.margintop-slg
           each comment in thread.comments
-            .comment.margintop-lg
-              a(href='',title='upvote').small.gray-font &#9650;
-              a(href='/user/'+comment.author.local.username).gray-font.small.marginleft #{comment.author.local.username}
-              span.small.gray-font  #{moment(comment.createdAt).fromNow()}
-              br
-              a(href='',title='upvote').small.gray-font &#9660;
-              span.marginleft #{comment.text}
+            table
+              tr
+                td(style='vertical-align:top').comment.margintop-lg
+                  a(href='',title='upvote',style='display:block;').small.gray-font &#9650;
+                  a(href='',title='downvote').small.gray-font &#9660;
+                td
+                  a(href='/user/'+comment.author.local.username).gray-font.small #{comment.author.local.username}
+                  span.small.gray-font  #{moment(comment.createdAt).fromNow()}
+                  div #{comment.text}
                 

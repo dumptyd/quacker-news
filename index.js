@@ -41,6 +41,7 @@ app.use(passport.session()); // persistent login sessions
 app.use(express.static(path.join(__dirname, 'public')));
 //-------------------------routes------------------------------//
 //routes go here
+const indexRoute = require('./routes/index')(Thread);
 //----------------------------routes----------------------------//
 app.get('/new', function (req, res) {
   //console.log(req.isAuthenticated());
@@ -93,22 +94,22 @@ app.get('/ask', function (req, res) {
     });
   });
 });
-app.get('/', function (req, res) {
-  //console.log(req.isAuthenticated());
-  let query = Thread.find({
-    type: 'link'
-  }).populate('author').sort('-upvoteCount').limit(30);
-  query.exec((err, posts) => {
-    if (err) return res.end(500);
-    let username;
-    if (req.user) username = req.user.local.username;
-    res.render('index', {
-      authenticated: req.isAuthenticated(),
-      user: username,
-      posts: posts
-    });
-  });
-});
+//app.get('/', function (req, res) {
+//  //console.log(req.isAuthenticated());
+//  let query = Thread.find({
+//    type: 'link'
+//  }).populate('author').sort('-upvoteCount').limit(30);
+//  query.exec((err, posts) => {
+//    if (err) return res.end(500);
+//    let username;
+//    if (req.user) username = req.user.local.username;
+//    res.render('index', {
+//      authenticated: req.isAuthenticated(),
+//      user: username,
+//      posts: posts
+//    });
+//  });
+//});
 app.get('/login', function (req, res) {
   let msg = req.flash('message');
   //console.log(msg);
@@ -139,7 +140,7 @@ app.post('/submit', function (req, res) {
           req.flash('submitmsg', 'An error occured.');
           return res.redirect('/submit');
         }
-        res.redirect('/' + doc._id);
+        res.redirect('/thread/' + doc._id);
       });
     } else if (req.body.text && req.body.text.length > 9) {
       let thread = new Thread({
@@ -154,7 +155,7 @@ app.post('/submit', function (req, res) {
           req.flash('submitmsg', 'An error occured.');
           return res.redirect('/submit');
         }
-        res.redirect('/' + doc._id);
+        res.redirect('/thread/' + doc._id);
       });
     } else {
       req.flash('submitmsg', 'URL field must contain a valid url. For text posts, text field must contain at least 10 characters.');
@@ -284,6 +285,7 @@ app.get('/comments', function (req, res) {
 });
 //-----route registration-----//
 //route registration here
+app.use('/',indexRoute);
 //----------------------------//
 //app.use(function (req, res) {
 //  res.redirect('/');

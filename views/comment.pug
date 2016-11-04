@@ -34,17 +34,17 @@ html.no-js(lang='')
           div.padbottom
             table
               tr
-                td(style='vertical-align:top;')
-                  a(href='',title='upvote').small.gray-font &#9650;
+                td(style='vertical-align:top').small
+                  .margintop
+                    a(href='',title='upvote',style='display:block;').small.gray-font &#9650;
+                    a(href='',title='downvote').small.gray-font &#9660;
                 td
-                  span.gray-font #{comment.text}
-              tr
-                td(style='vertical-align:top;')
-                  a(href='',title='downvote').small.gray-font &#9660;
-                td
-                  span.info.gray-font.small 
+                  span.info.gray-font.small
                     span.small #{comment.upvoteCount - comment.downvoteCount} points by 
-                  a(href='/user/'+comment.author.local.username) #{comment.author.local.username} 
-                  | #{moment(comment.createdAt).fromNow()} | 
-                  a(href='/thread/'+comment.thread._id).gray-font.small go to thread
+                      a(href='/user/'+comment.author.local.username) #{comment.author.local.username} 
+                      | #{moment(comment.createdAt).fromNow()} | on: 
+                    a(href='/thread/'+comment.thread._id).gray-font.small #{comment.thread.title.length>50?comment.thread.title.substring(0,50)+'...':comment.thread.title}
+                  br
+                  span.black.comment #{comment.text}
+                  
                 

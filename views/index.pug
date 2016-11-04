@@ -15,7 +15,7 @@ html.no-js(lang='')
         .padleft.inline
           a.padleft.padright(href='/new',class=page==='new'?'white':'') new
           |  |
-          a.padleft.padright(href='#') comments
+          a.padleft.padright(href='/comments') comments
           |  |
           a.padleft.padright(href='/show',class=page==='show'?'white':'') show
           |  |
@@ -32,15 +32,21 @@ html.no-js(lang='')
       .grey.posts
         each post in posts
           div.padbottom
-            a(href='',title='upvote').small.gray-font &#9650;
-            a(href=post.url||'/thread/'+post._id).marginleft #{post.title}
-            if post.url
-              span.gray-font.small  
-                a.small.gray-font (#{node_url.parse(post.url).hostname})
-            br
-            span.info.gray-font.small 
-              span.small #{post.upvotes.length} points by 
-                a(href='/user/'+post.author.local.username) #{post.author.local.username} 
-                | #{moment(post.createdAt).fromNow()} | 
-              a(href='/thread/'+post._id).gray-font.small #{post.comments.length} comments
+            table
+              tr
+                td(style='vertical-align:top;').small.margintop
+                  a(href='',title='upvote',style='display:block;').small.gray-font &#9650;
+                  //a(href='',title='downvote').small.gray-font &#9660;
+                  //a(href=post.url||'/thread/'+post._id).marginleft #{post.title}
+                td
+                  a(href=post.url||'/thread/'+post._id) #{post.title}
+                  if post.url
+                    span.gray-font.small  
+                      a.small.gray-font (#{node_url.parse(post.url).hostname})
+                  br
+                  span.info.gray-font.small 
+                    span.small #{post.upvotes.length} points by 
+                      a(href='/user/'+post.author.local.username) #{post.author.local.username}
+                      |  #{moment(post.createdAt).fromNow()} | 
+                    a(href='/thread/'+post._id).gray-font.small #{post.comments.length} comments
                 
