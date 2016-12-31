@@ -7,6 +7,7 @@ html.no-js(lang='')
     title Profile: #{user.local.username} | Quacker News
     meta(name='description', content='A basic hackernews clone')
     meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='icon' type='image/png' href='/favicon.png')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet', href='/css/main.css')
   body
@@ -21,11 +22,16 @@ html.no-js(lang='')
           a.padleft.padright(href='/show') show
           |  |
           a.padleft.padright(href='/ask') ask
+          if currUser.role == 'admin'
+            | |
+            a.padleft.padright(href='/admin/removedthreads',class=page=='removedthreads'?'white':'') removed threads
+            | |
+            a.padleft.padright(href='/admin/removedcomments',class=page=='removedcomments'?'white':'') removed comments
           |  |
           a.padleft.padright(href='/submit') submit
         .padright.inline.pull-right
           if authenticated==true
-            a.padleft.padright(href='/user/'+user.local.username) #{user.local.username}
+            a.padleft.padright(href='/user/'+cUsername) #{cUsername} (#{currUser.karma})
             |  |
             a.padleft.padright(href='/logout') logout
           else
@@ -48,11 +54,15 @@ html.no-js(lang='')
             tr
               td
               td
-                a(href='/'+user.local.username+'/comments').underline comments
+                a(href='/user/'+user.local.username+'/comments').underline comments (#{user.comments ? user.comments.length : 0})
+            tr
+                td
+                td
+                  a(href='/user/'+user.local.username+'/threads').underline threads (#{user.threads ? user.threads.length : 0})
             tr
               td
               td
-                a(href='/'+user.local.username+'/favorites').underline favorites
+                a(href='#').underline favorites (doesn't work ... yet)
         else
           form(action='/updateuser',method='POST')
             table
@@ -73,11 +83,15 @@ html.no-js(lang='')
               tr
                 td
                 td
-                  a(href='/'+user.local.username+'/comments').underline comments
+                  a(href='/user/'+user.local.username+'/comments').underline comments (#{user.comments ? user.comments.length : 0})
               tr
                 td
                 td
-                  a(href='/'+user.local.username+'/favorites').underline favorites
+                  a(href='/user/'+user.local.username+'/threads').underline threads (#{user.threads ? user.threads.length : 0})
+              tr
+                td
+                td
+                  a(href='#').underline favorites (not implemented yet)
               tr
                 td
                   input(type='submit',value='update').black

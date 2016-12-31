@@ -1,4 +1,9 @@
 {
   "esversion": 6,
-  "node":true
+  "node": true,
+  "browser": true,
+  "-W041": false,
+  "globals": {
+    "$": true
+  }
 }

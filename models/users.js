@@ -5,6 +5,11 @@ var userSchema = mongoose.Schema({
     username: String,
     password: String,
   },
+  role: {
+    type: String,
+    enum: ['admin', 'superuser', 'user'],
+    default: 'user'
+  },
   karma: {
     type: Number,
     default: 0
@@ -13,6 +18,10 @@ var userSchema = mongoose.Schema({
   comments: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Comments'
+  }],
+  threads: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Threads'
   }],
   favorites: [{
     type: mongoose.Schema.Types.ObjectId,

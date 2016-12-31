@@ -20,6 +20,11 @@ var commentsSchema = mongoose.Schema({
     type: Number,
     default: 0
   },
+  status: {
+    type: String,
+    enum: ['active', 'removed'],
+    default: 'active'
+  },
   thread: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Threads'

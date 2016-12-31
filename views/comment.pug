@@ -6,45 +6,48 @@ html.no-js(lang='')
     title Quacker News
     meta(name='description', content='A basic hackernews clone')
     meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='icon' type='image/png' href='/favicon.png')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet', href='/css/main.css')
+    script(src='https://code.jquery.com/jquery-3.1.1.min.js')
+    if(user.role && user.role == 'admin')
+      script(src='../admin/js/main.js')
+    else
+      script(src='/js/main.js') 
   body
-    .container.padtop
-      .blue.header
-        a(href='/').bold.inline Quacker News
-        .padleft.inline
-          a.padleft.padright(href='/new',class=page==='new'?'white':'') new
-          |  |
-          a.padleft.padright(href='#') comments
-          |  |
-          a.padleft.padright(href='/show',class=page==='show'?'white':'') show
-          |  |
-          a.padleft.padright(href='/ask',class=page==='ask'?'white':'') ask
-          |  |
-          a.padleft.padright(href='/submit') submit
-        .padright.inline.pull-right
-          if authenticated==true
-            a.padleft.padright(href='/user/'+user) #{user}
-            |  |
-            a.padleft.padright(href='/logout') logout
-          else
-            a.padleft.padright(href='/login') login
+    .container.padtop.no-margin-padding-on-small-screens 
+      include header.pug
       .grey.posts
-        each comment in comments
-          div.padbottom
-            table
-              tr
-                td(style='vertical-align:top').small
+        table
+          each comment, index in comments
+            tr
+              td(style='vertical-align:top;')
+                .gray-font #{index+1+((pageno-1)*30)}. 
+              td(style='vertical-align:top').small
+                if authenticated == true
                   .margintop
-                    a(href='',title='upvote',style='display:block;').small.gray-font &#9650;
-                    a(href='',title='downvote').small.gray-font &#9660;
-                td
-                  span.info.gray-font.small
-                    span.small #{comment.upvoteCount - comment.downvoteCount} points by 
-                      a(href='/user/'+comment.author.local.username) #{comment.author.local.username} 
-                      | #{moment(comment.createdAt).fromNow()} | on: 
-                    a(href='/thread/'+comment.thread._id).gray-font.small #{comment.thread.title.length>50?comment.thread.title.substring(0,50)+'...':comment.thread.title}
-                  br
+                    div(class=comment.upvotes.indexOf(user._id)!=-1?'upvoted':'', data-oid=comment._id,  title='upvote').small.gray-font.upvote-comment &#9650;
+                    div(class=comment.downvotes.indexOf(user._id)!=-1?'downvoted':'', data-oid=comment._id, title='downvote').small.gray-font.downvote-comment &#9660;
+              td
+                span.info.gray-font.small
+                  span.small #{comment.upvoteCount - comment.downvoteCount} points by 
+                    a(href='/user/'+comment.author.local.username) #{comment.author.local.username} 
+                    | #{moment(comment.createdAt).fromNow()} | on: 
+                  a(href='/thread/'+comment.thread._id).gray-font.small #{comment.thread.title.length>50?comment.thread.title.substring(0,50)+'...':comment.thread.title}
+                br
+                if comment.status == 'active' || page == 'removedcomments'
                   span.black.comment #{comment.text}
-                  
+                else
+                  div
+                    kbd [removed #{moment(comment.updatedAt).fromNow()}]
+                if user.role == 'admin' && page == 'removedcomments'
+                    .small.padtop.gray-font
+                      input(type='button' value=comment.status=='active'?'mark as removed':'unmark as removed' data-type='comment' data-oid=comment._id).disguised-btn.unmark-removed
+          if comments.length == 30 && Number.isInteger(pageno)
+            tr
+              td
+              td
+              td.padtop
+                a(href='?page='+(pageno+1)).underline more
+        include footer.pug
                 

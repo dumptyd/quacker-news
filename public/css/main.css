@@ -68,7 +68,7 @@ body{
 }
 
 table {
-  border-spacing: 10px;
+  border-spacing: 5px;
   border-collapse: separate;
 }
 .white{
@@ -82,4 +82,82 @@ table {
 }
 .comment{
   font-size:9pt;
+}
+
+.upvoted, .downvoted {
+  color: #64B2F6;
+}
+.upvote-comment, .downvote-comment, .upvote-thread {
+  cursor: pointer;
+}
+.upvote-comment:focus, .downvote-comment:focus, .upvote-thread:focus {
+  outline:none;
+  color: inherit;
+}
+
+.black {
+  color: #000;
+}
+
+.disguised-btn {
+  border: none;
+  background: none;
+  color: inherit;
+  padding: 0;
+}
+
+.disguised-btn:hover {
+  text-decoration: underline;
+}
+
+.custom-textarea{
+  max-width: 500px;
+}
+
+.block {
+  display: block;
+}
+
+.no-margin-padding-on-small-screens, .but-not-on-small-screens {
+  
+}
+
+.full-width-hr {
+  width: 100%;
+  border-top: 3px solid #64B2F6;
+}
+
+.container {
+  margin-bottom: 50px;
+}
+
+.no-underline:hover {
+  text-decoration: none;
+}
+
+@media (max-width: 800px) {
+  .no-margin-padding-on-small-screens {
+    margin:0 !important;
+    padding: 0 !important;
+    margin-bottom: 50px;
+  }
+  .but-not-on-small-screens {
+    float: none !important;
+    display:inline;
+  }
+  .but-not-on-small-screens:before {
+    content: " |";
+  }
+  .left {
+    display: inline;
+  }
+  .title {
+    display: block;
+  }
+  .padleft {
+    padding-left: 3px;
+  }
+  .padright {
+    padding-right: 3px;
+  }
 }

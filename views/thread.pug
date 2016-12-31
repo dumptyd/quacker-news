@@ -7,60 +7,65 @@ html.no-js(lang='')
     title #{thread.title} | Quacker News
     meta(name='description', content='A basic hackernews clone')
     meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='icon' type='image/png' href='/favicon.png')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet', href='/css/main.css')
+    script(src='https://code.jquery.com/jquery-3.1.1.min.js')
+    if(user.role && user.role == 'admin')
+      script(src='../admin/js/main.js')
+    else
+      script(src='/js/main.js') 
   body
-    .container.padtop
-      .blue.header
-        a(href='/').bold.inline Quacker News
-        .padleft.inline
-          a.padleft.padright(href='/new') new
-          |  |
-          a.padleft.padright(href='/comments') comments
-          |  |
-          a.padleft.padright(href='/show') show
-          |  |
-          a.padleft.padright(href='/ask') ask
-          |  |
-          a.padleft.padright(href='/submit') submit
-        .padright.inline.pull-right
-          if authenticated==true
-            a.padleft.padright(href='/user/'+user) #{user}
-            |  |
-            a.padleft.padright(href='/logout') logout
-          else
-            a.padleft.padright(href='/login') login
+    .container.padtop.no-margin-padding-on-small-screens 
+      include header.pug
       .grey.posts
         div.padbottom
           table
             tr
-              td(style='vertical-align:top;').small.margintop
-                a(href='/vote?',title='upvote',style='display:block;').small.gray-font &#9650;
-                //a(href='',title='downvote').small.gray-font &#9660;
-              td
-                a(href=thread.url||'/thread/'+thread._id) #{thread.title}
-                if thread.url
+              td(style='vertical-align:top;').small
+                if authenticated==true
+                  .margintop
+                    div(class=thread.upvotes.indexOf(user._id)!=-1?'upvoted':'', data-oid=thread._id,  title='upvote').small.gray-font.upvote-thread &#9650;
+                  //a(href='',title='downvote').small.gray-font &#9660;
+              td(style='vertical-align:top;')
+                a(href = thread.status=='active' ? thread.url || '/thread/'+thread._id : '/img/removed.png', target='_blank') #{thread.title}
+                if thread.url && thread.status == 'active'
                     span.gray-font.small  
                       a.small.gray-font (#{node_url.parse(thread.url).hostname})
                 .info.small.gray-font #{thread.upvotes.length} points by 
                   a(href='/user/'+thread.author.local.username) #{thread.author.local.username}
-                  |  |  
+                  |  #{moment(thread.createdAt).fromNow()} |  
                   a(href='/thread/'+thread._id).gray-font #{thread.comments.length} comments
-                if thread.text && thread.type!='link'
+                  if user.role == 'admin'
+                    |  | 
+                    input(type='button' value=thread.status=='active'?'mark as removed':'removed' data-type='thread' data-oid=thread._id disabled=thread.status=='removed').disguised-btn.mark-removed
+                if thread.text && thread.type!='link' && thread.status == 'active'
                   div.padtop.gray-font !{thread.text.replace(/\n/g, '<br>')}
+                else if thread.status == 'removed'
+                  div.padtop
+                    kbd [removed #{moment(thread.updatedAt).fromNow()}]
         form(action='/thread/'+thread._id, method='post').padtop
-          textarea(name='text' rows='4' cols='70')
-          br
-          input(type='submit', value='add comment').margintop-lg
+          textarea(name='text', rows='4' ).form-control.custom-textarea
+          input(type='submit', value='add comment').margintop-lg.btn-default.btn
         .comments.margintop-slg
-          each comment in thread.comments
-            table
+          table
+            each comment in thread.comments
               tr
-                td(style='vertical-align:top').comment.margintop-lg
-                  a(href='',title='upvote',style='display:block;').small.gray-font &#9650;
-                  a(href='',title='downvote').small.gray-font &#9660;
+                td(style='vertical-align:top').comment
+                  if authenticated==true
+                    .margintop
+                      div(class=comment.upvotes.indexOf(user._id)!=-1?'upvoted':'', data-oid=comment._id,  title='upvote').small.gray-font.upvote-comment &#9650;
+                      div(class=comment.downvotes.indexOf(user._id)!=-1?'downvoted':'', data-oid=comment._id, title='downvote').small.gray-font.downvote-comment &#9660;
                 td
-                  a(href='/user/'+comment.author.local.username).gray-font.small #{comment.author.local.username}
-                  span.small.gray-font  #{moment(comment.createdAt).fromNow()}
-                  div #{comment.text}
+                  a(href='/user/'+comment.author.local.username).black.small #{comment.author.local.username}
+                  span.small.gray-font  #{moment(comment.createdAt).fromNow()} 
+                    span.black +#{comment.upvoteCount} | -#{comment.downvoteCount} 
+                  if comment.status == 'active'
+                    div.black #{comment.text}
+                  else
+                    div
+                      kbd [removed #{moment(comment.updatedAt).fromNow()}]
+                  if user.role == 'admin'
+                    .small.padtop.gray-font
+                      input(type='button' value=comment.status=='active'?'mark as removed':'removed' data-type='comment' data-oid=comment._id disabled=thread.status=='removed').disguised-btn.mark-removed
                 

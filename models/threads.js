@@ -8,11 +8,12 @@ var threadsSchema = mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Users'
   }],
-  upvoteCount: {
-    type: Number,
-    default: 0
+  status: {
+    type: String,
+    enum: ['active', 'removed'],
+    default: 'active'
   },
-  downvoteCount: {
+  upvoteCount: {
     type: Number,
     default: 0
   },

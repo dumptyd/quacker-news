@@ -2,18 +2,20 @@ require('dotenv').config({
   silent: true
 });
 const express = require('express'),
-  app = express(),
-  port = process.env.PORT || 8080,
-  mongoose = require('mongoose'),
-  passport = require('passport'),
-  session = require('express-session'),
-  cookieParser = require('cookie-parser'),
-  bodyParser = require('body-parser'),
-  flash = require('connect-flash'),
-  path = require('path'),
-  User = require('./models/users'),
-  Thread = require('./models/threads'),
-  Comment = require('./models/comments');
+      app = express(),
+      port = process.env.OPENSHIFT_NODEJS_PORT || 8080,
+      ip = process.env.OPENSHIFT_NODEJS_IP || '127.0.0.1',
+      mongoose = require('mongoose'),
+      passport = require('passport'),
+      session = require('express-session'),
+      cookieParser = require('cookie-parser'),
+      bodyParser = require('body-parser'),
+      flash = require('connect-flash'),
+      path = require('path'),
+      User = require('./models/users'),
+      Thread = require('./models/threads'),
+  //Comment is some sort of reserved keyword in JSHint it seems
+      Comment = require('./models/comments'); //jshint ignore:line
 app.locals.moment = require('moment');
 app.locals.node_url = require('url');
 // ----------------------configuration------------------------//
@@ -39,257 +41,51 @@ app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session()); // persistent login sessions
 app.use(express.static(path.join(__dirname, 'public')));
+app.get('/admin/js/main.js', function(req, res){
+  if(req.isAuthenticated() && req.user.role == 'admin')
+    return res.sendFile(path.join(__dirname, './admin/js/main.js'));
+  else
+    return res.sendStatus(404);
+});
 //-------------------------routes------------------------------//
 //routes go here
 const indexRoute = require('./routes/index')(Thread);
-//----------------------------routes----------------------------//
-app.get('/new', function (req, res) {
-  //console.log(req.isAuthenticated());
-  let query = Thread.find({
-    type: 'link'
-  }).populate('author').sort('-createdAt').limit(30);
-  query.exec((err, posts) => {
-    if (err) return res.end(500);
-    let username;
-    if (req.user) username = req.user.local.username;
-    res.render('index', {
-      authenticated: req.isAuthenticated(),
-      user: username,
-      posts: posts,
-      page: 'new'
-    });
-  });
-});
-app.get('/show', function (req, res) {
-  //console.log(req.isAuthenticated());
-  let query = Thread.find({
-    type: 'show'
-  }).populate('author').sort('-upvoteCount').limit(30);
-  query.exec((err, posts) => {
-    if (err) return res.end(500);
-    let username;
-    if (req.user) username = req.user.local.username;
-    res.render('index', {
-      authenticated: req.isAuthenticated(),
-      user: username,
-      posts: posts,
-      page: 'show'
-    });
-  });
-});
-app.get('/ask', function (req, res) {
-  //console.log(req.isAuthenticated());
-  let query = Thread.find({
-    type: 'ask'
-  }).populate('author').sort('-upvoteCount').limit(30);
-  query.exec((err, posts) => {
-    if (err) return res.end(500);
-    let username;
-    if (req.user) username = req.user.local.username;
-    res.render('index', {
-      authenticated: req.isAuthenticated(),
-      user: username,
-      posts: posts,
-      page: 'ask'
-    });
-  });
-});
-//app.get('/', function (req, res) {
-//  //console.log(req.isAuthenticated());
-//  let query = Thread.find({
-//    type: 'link'
-//  }).populate('author').sort('-upvoteCount').limit(30);
-//  query.exec((err, posts) => {
-//    if (err) return res.end(500);
-//    let username;
-//    if (req.user) username = req.user.local.username;
-//    res.render('index', {
-//      authenticated: req.isAuthenticated(),
-//      user: username,
-//      posts: posts
-//    });
-//  });
-//});
-app.get('/login', function (req, res) {
-  let msg = req.flash('message');
-  //console.log(msg);
-  res.render('login', {
-    message: msg
-  });
-});
-app.get('/submit', isLoggedIn, function (req, res) {
-  res.render('submit', {
-    message: req.flash('submitmsg')
-  });
-});
-app.post('/submit', function (req, res) {
-  let title = req.body.title;
-  if (title.length) {
-    if (req.body.url && req.body.url.length && /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,6}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/.test(req.body.url)) {
-      let type = 'link';
-      if (title.startsWith('Show QN:')) type = 'show';
-      let thread = new Thread({
-        author: req.user._id,
-        title: title,
-        url: req.body.url,
-        type: type
-      });
-      thread.save((err, doc) => {
-        if (err) {
-          console.log(err);
-          req.flash('submitmsg', 'An error occured.');
-          return res.redirect('/submit');
-        }
-        res.redirect('/thread/' + doc._id);
-      });
-    } else if (req.body.text && req.body.text.length > 9) {
-      let thread = new Thread({
-        author: req.user._id,
-        title: title,
-        text: req.body.text,
-        type: 'ask'
-      });
-      thread.save((err, doc) => {
-        if (err) {
-          console.log(err);
-          req.flash('submitmsg', 'An error occured.');
-          return res.redirect('/submit');
-        }
-        res.redirect('/thread/' + doc._id);
-      });
-    } else {
-      req.flash('submitmsg', 'URL field must contain a valid url. For text posts, text field must contain at least 10 characters.');
-      res.redirect('/submit');
-    }
-  } else {
-    req.flash('submitmsg', 'Title cannot be empty.');
-    res.redirect('/submit');
-  }
-});
-app.post('/signup', passport.authenticate('local-signup', {
-  successRedirect: '/login',
-  failureRedirect: '/login',
-  failureFlash: true
-}));
-app.get('/logout', function (req, res) {
-  req.logout();
-  res.redirect('/');
-});
-app.get('/thread/:id', function (req, res) {
-  let id = req.params.id;
-  Thread.findOne({
-    _id: id
-  }).populate('author').populate({
-    path: 'comments',
-    populate: {
-      path: 'author',
-      model: 'Users'
-    }
-  }).exec((err, thread) => {
-    console.log(thread);
-    res.render('thread', {
-      authenticated: req.isAuthenticated(),
-      thread: thread,
-      user: req.user ? req.user.local.username : ''
-    });
-  });
-});
-app.post('/thread/:id', function (req, res) {
-  let id = req.params.id;
-  let text = req.body.text;
-  if (!req.isAuthenticated()) {
-    req.flash('message', 'You need to be logged in.');
-    return res.redirect('/login');
-  }
-  if (!text) {}
-  console.log(id, text);
-  let comment = new Comment({
-    author: req.user._id,
-    thread: id,
-    text: text
-  });
-  Thread.findOne({
-    _id: id
-  }, (err, thread) => {
-    if (thread) {
-      comment.save((err, com) => {
-        thread.comments.push(com._id);
-        thread.save((err, doc) => {
-          res.redirect('/thread/' + id);
-        });
-      });
-    }
-  });
-});
-app.post('/login', passport.authenticate('local-login', {
-  successRedirect: '/', // redirect to the secure profile section
-  failureRedirect: '/login', // redirect back to the signup page if there is an error
-  failureFlash: true // allow flash messages
-}));
-app.get('/user/:username', function (req, res) {
-  let username = req.params.username;
-  User.findOne({
-    'local.username': username
-  }).select('local.username karma about createdAt').exec(function (err, user) {
-    if (user) {
-      let thisuser = false;
-      if (req.user)
-        if (req.user.local.username === user.local.username)
-          thisuser = true;
-      res.render('user', {
-        user: user,
-        authenticated: req.isAuthenticated(),
-        thisuser: thisuser
-      });
-    } else
-      res.render('404');
-  });
-});
-app.post('/updateuser', function (req, res) {
-  //console.log('hue',req.body.about);
-  if (typeof req.body.about === 'undefined' || !req.isAuthenticated()) {
-    if (req.user)
-      return res.redirect('/user/' + req.user.local.username);
-    else
-      return res.redirect('/');
-  }
-  let about = req.body.about;
-  User.findOne({
-    '_id': req.user._id
-  }).select('about').exec(function (err, user) {
-    if (user) {
-      user.about = about;
-      user.save(function (err, doc) {
-        return res.redirect('/user/' + req.user.local.username);
-      });
-    } else
-      res.redirect('/user/' + req.user.local.username);
-  });
-});
-app.get('/comments', function (req, res) {
-  let username;
-  if (req.user) username = req.user.local.username;
-  Comment.find({}).
-  limit(30).
-  select('author thread text createdAt upvoteCount downvoteCount').
-  populate('thread').
-  populate('author').
-  sort('-createdAt').
-  exec(function (err, comments) {
-    res.render('comment', {
-      authenticated: req.isAuthenticated(),
-      comments: comments,
-      user:username
-    });
-  });
-});
+const commentsRoute = require('./routes/comments')(Comment);
+const updateuserRoute = require('./routes/updateuser')(User);
+const newRoute = require('./routes/new')(Thread);
+const showRoute = require('./routes/show')(Thread);
+const askRoute = require('./routes/ask')(Thread);
+const loginRoute = require('./routes/login')(passport);
+const signupRoute = require('./routes/signup')(passport);
+const logoutRoute = require('./routes/logout')();
+const submitRoute = require('./routes/submit')(isLoggedIn, Thread);
+const threadRoute = require('./routes/thread')(Thread, Comment, User);
+const userRoute = require('./routes/user')(User, Comment);
+const voteRoute = require('./routes/vote')(isLoggedIn, Comment, User, Thread);
+const adminRoute = require('./routes/admin')(Comment, Thread);
+//----------------------------routes-end----------------------------//
 //-----route registration-----//
 //route registration here
 app.use('/',indexRoute);
-//----------------------------//
-//app.use(function (req, res) {
-//  res.redirect('/');
-//});
+app.use('/comments',commentsRoute);
+app.use('/updateUser',updateuserRoute);
+app.use('/new',newRoute);
+app.use('/show', showRoute);
+app.use('/ask', askRoute);
+app.use('/login', loginRoute);
+app.use('/signup', signupRoute);
+app.use('/logout', logoutRoute);
+app.use('/submit', submitRoute);
+app.use('/thread', threadRoute);
+app.use('/user', userRoute);
+app.use('/vote', voteRoute);
+app.use('/admin', adminRoute);
+//-----route registration end-----//
+
+app.get('*', function(req, res){
+  console.log('404ing');
+  res.render('404');
+});
 function isLoggedIn(req, res, next) {
   if (req.isAuthenticated()) {
     return next();
@@ -299,6 +95,7 @@ function isLoggedIn(req, res, next) {
 }
 //--------------------------------------------------------------//
 db.once('open', function (err) {
-  app.listen(port);
-  console.log('Running on ' + port);
+  app.listen(port, ip, function(){
+    console.log(`Running on ${ip} ${port} `);
+  });
 });

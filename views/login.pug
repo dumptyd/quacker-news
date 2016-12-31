@@ -6,6 +6,7 @@ html.no-js(lang='')
     title Login | Quacker News
     meta(name='description', content='A basic hackernews clone')
     meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='icon' type='image/png' href='/favicon.png')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet', href='/css/main.css')
   body.padleft
@@ -20,13 +21,13 @@ html.no-js(lang='')
         tr
           td username:
           td
-            input(type='text', name='username', size='20', autocorrect='off', spellcheck='false', autocapitalize='off', autofocus='true')
+            input(type='text', name='username', size='20', autocorrect='off', spellcheck='false', autocapitalize='off', autofocus='true').form-control.input-sm
         tr
           td password:
           td
-            input(type='password', name='password', size='20')
+            input(type='password', name='password', size='20').form-control.input-sm
       br
-      input(type='submit', value='login')
+      input(type='submit', value='login').btn-default.btn.btn-sm
     br
     br
     b Create Account
@@ -37,10 +38,10 @@ html.no-js(lang='')
         tr
           td username:
           td
-            input(type='text', name='username', size='20', autocorrect='off', spellcheck='false', autocapitalize='off')
+            input(type='text', name='username', size='20', autocorrect='off', spellcheck='false', autocapitalize='off').form-control.input-sm
         tr
           td password:
           td
-            input(type='password', name='password', size='20')
+            input(type='password', name='password', size='20').form-control.input-sm
       br
-      input(type='submit', value='create account')
+      input(type='submit', value='create account').btn-default.btn.btn-sm

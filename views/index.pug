@@ -6,47 +6,48 @@ html.no-js(lang='')
     title Quacker News
     meta(name='description', content='A basic hackernews clone')
     meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='icon' type='image/png' href='/favicon.png')
     link(rel='stylesheet', href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css')
     link(rel='stylesheet', href='/css/main.css')
+    script(src='https://code.jquery.com/jquery-3.1.1.min.js')
+    if(user.role && user.role == 'admin')
+      script(src='../admin/js/main.js')
+    else
+      script(src='/js/main.js') 
   body
-    .container.padtop
-      .blue.header
-        a(href='/').bold.inline Quacker News
-        .padleft.inline
-          a.padleft.padright(href='/new',class=page==='new'?'white':'') new
-          |  |
-          a.padleft.padright(href='/comments') comments
-          |  |
-          a.padleft.padright(href='/show',class=page==='show'?'white':'') show
-          |  |
-          a.padleft.padright(href='/ask',class=page==='ask'?'white':'') ask
-          |  |
-          a.padleft.padright(href='/submit') submit
-        .padright.inline.pull-right
-          if authenticated==true
-            a.padleft.padright(href='/user/'+user) #{user}
-            |  |
-            a.padleft.padright(href='/logout') logout
-          else
-            a.padleft.padright(href='/login') login
+    .container.padtop.no-margin-padding-on-small-screens 
+      include header.pug
       .grey.posts
-        each post in posts
-          div.padbottom
-            table
-              tr
-                td(style='vertical-align:top;').small.margintop
-                  a(href='',title='upvote',style='display:block;').small.gray-font &#9650;
+        table
+          each post, index in posts
+            tr
+              td(style='vertical-align:top;')
+                .gray-font #{index+1+((pageno-1)*30)}.
+              td(style='vertical-align:top;').small
+                if authenticated == true
+                  div(class=post.upvotes.indexOf(user._id)!=-1?'upvoted':'', data-oid=post._id,  title='upvote').small.gray-font.upvote-thread &#9650;
                   //a(href='',title='downvote').small.gray-font &#9660;
                   //a(href=post.url||'/thread/'+post._id).marginleft #{post.title}
-                td
-                  a(href=post.url||'/thread/'+post._id) #{post.title}
-                  if post.url
-                    span.gray-font.small  
-                      a.small.gray-font (#{node_url.parse(post.url).hostname})
-                  br
-                  span.info.gray-font.small 
-                    span.small #{post.upvotes.length} points by 
-                      a(href='/user/'+post.author.local.username) #{post.author.local.username}
-                      |  #{moment(post.createdAt).fromNow()} | 
-                    a(href='/thread/'+post._id).gray-font.small #{post.comments.length} comments
-                
+              td(style='vertical-align:top;')
+                a(href=post.status=='active' || page == 'removedthreads' ? post.url||'/thread/'+post._id : '/img/removed.png', target='_blank') #{post.title}
+                if post.url && (post.status == 'active' || page == 'removedthreads')
+                  span.gray-font.small 
+                    a.small.gray-font (#{node_url.parse(post.url).hostname})
+                br
+                if page == 'removedthreads' && user.role == 'admin' && post.text
+                  div.padtop.gray-font !{post.text.replace(/\n/g, '<br>')}
+                span.info.gray-font.small
+                  span.small #{post.upvotes.length} points by 
+                    a(href='/user/'+post.author.local.username) #{post.author.local.username}
+                    |   #{moment(post.createdAt).fromNow()} | 
+                  a(href='/thread/'+post._id).gray-font.small #{post.comments.length} comments
+                  if user.role == 'admin' && page == 'removedthreads'
+                    |  | 
+                    input(type='button' value=post.status=='active'?'mark as removed':'unmark as removed' data-type='thread' data-oid=post._id).disguised-btn.unmark-removed
+          if posts.length == 30 && Number.isInteger(pageno)
+            tr
+              td
+              td
+              td
+                a(href='?page='+(pageno+1)) more
+        include footer.pug

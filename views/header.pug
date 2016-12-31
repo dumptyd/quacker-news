@@ -1,0 +1,26 @@
+.blue.header
+  a(href='/').bold.inline.title.no-underline
+    img(src='/img/logo.png' style='border: 1px solid #fff; height:20px; width:20px;') 
+    |  Quacker News
+  .padleft.inline.left
+    a.padleft.padright(href='/new',class=page==='new'?'white':'') new
+    | |
+    a.padleft.padright(href='/comments',class=page==='comments'?'white':'') comments
+    | |
+    a.padleft.padright(href='/show',class=page==='show'?'white':'') show
+    | |
+    a.padleft.padright(href='/ask',class=page==='ask'?'white':'') ask
+    if user.role == 'admin'
+      | |
+      a.padleft.padright(href='/admin/removedthreads',class=page=='removedthreads'?'white':'') removed threads
+      | |
+      a.padleft.padright(href='/admin/removedcomments',class=page=='removedcomments'?'white':'') removed comments
+    | |
+    a.padleft.padright(href='/submit') submit
+  .padright.inline.pull-right.but-not-on-small-screens
+    if authenticated==true
+      a.padleft.padright(href='/user/'+user.local.username) #{user.local.username} (#{user.karma})
+      | |
+      a.padleft.padright(href='/logout') logout
+    else
+      a.padleft.padright(href='/login') login
