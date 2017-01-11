@@ -1,4 +1,4 @@
-
+- var MIN_KARMA_TO_VOTE = 10;
 doctype html
 html.no-js(lang='')
   head
@@ -23,7 +23,7 @@ html.no-js(lang='')
           table
             tr
               td(style='vertical-align:top;').small
-                if authenticated==true
+                if authenticated==true && user && user.karma >= MIN_KARMA_TO_VOTE || user.role == 'admin'
                   .margintop
                     div(class=thread.upvotes.indexOf(user._id)!=-1?'upvoted':'', data-oid=thread._id,  title='upvote').small.gray-font.upvote-thread &#9650;
                   //a(href='',title='downvote').small.gray-font &#9660;
@@ -46,13 +46,15 @@ html.no-js(lang='')
                     kbd [removed #{moment(thread.updatedAt).fromNow()}]
         form(action='/thread/'+thread._id, method='post').padtop
           textarea(name='text', rows='4' ).form-control.custom-textarea
+          if recaptcha
+            div.margintop-lg !{recaptcha}
           input(type='submit', value='add comment').margintop-lg.btn-default.btn
         .comments.margintop-slg
           table
             each comment in thread.comments
               tr
                 td(style='vertical-align:top').comment
-                  if authenticated==true
+                  if authenticated==true && user && user.karma >= MIN_KARMA_TO_VOTE || user.role == 'admin'
                     .margintop
                       div(class=comment.upvotes.indexOf(user._id)!=-1?'upvoted':'', data-oid=comment._id,  title='upvote').small.gray-font.upvote-comment &#9650;
                       div(class=comment.downvotes.indexOf(user._id)!=-1?'downvoted':'', data-oid=comment._id, title='downvote').small.gray-font.downvote-comment &#9660;

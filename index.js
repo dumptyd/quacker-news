@@ -12,6 +12,7 @@ const express = require('express'),
       bodyParser = require('body-parser'),
       flash = require('connect-flash'),
       path = require('path'),
+      recaptcha = require('./lib/express-recaptcha'),
       User = require('./models/users'),
       Thread = require('./models/threads'),
   //Comment is some sort of reserved keyword in JSHint it seems
@@ -19,6 +20,7 @@ const express = require('express'),
 app.locals.moment = require('moment');
 app.locals.node_url = require('url');
 // ----------------------configuration------------------------//
+recaptcha.init(process.env.RECAPTCHA_SITE_KEY, process.env.RECAPTCHA_SECRET_KEY);
 mongoose.Promise = global.Promise;
 mongoose.connect(process.env.DB_URL, {
   user: process.env.DB_USER,
@@ -58,8 +60,8 @@ const askRoute = require('./routes/ask')(Thread);
 const loginRoute = require('./routes/login')(passport);
 const signupRoute = require('./routes/signup')(passport);
 const logoutRoute = require('./routes/logout')();
-const submitRoute = require('./routes/submit')(isLoggedIn, Thread);
-const threadRoute = require('./routes/thread')(Thread, Comment, User);
+const submitRoute = require('./routes/submit')(isLoggedIn, Thread, recaptcha);
+const threadRoute = require('./routes/thread')(Thread, Comment, User, recaptcha);
 const userRoute = require('./routes/user')(User, Comment);
 const voteRoute = require('./routes/vote')(isLoggedIn, Comment, User, Thread);
 const adminRoute = require('./routes/admin')(Comment, Thread);
@@ -96,6 +98,6 @@ function isLoggedIn(req, res, next) {
 //--------------------------------------------------------------//
 db.once('open', function (err) {
   app.listen(port, ip, function(){
-    console.log(`Running on ${ip} ${port} `);
+    console.log(`Running on ${ip}:${port} `);
   });
 });

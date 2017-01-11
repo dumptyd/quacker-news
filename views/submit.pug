@@ -14,7 +14,7 @@ html.no-js(lang='')
       .blue.header
         .bold.inline Submit
       .grey.posts
-        if message&&message.length
+        if message && message.length
           span.bold.small #{message}
         form(action='/submit', method='post')
           table(border='0')
@@ -37,6 +37,10 @@ html.no-js(lang='')
             tr
               td
               td
+            if recaptcha 
+              tr
+                td Recaptcha
+                td !{recaptcha} 
             tr
               td
               td

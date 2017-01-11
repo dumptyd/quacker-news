@@ -1,3 +1,4 @@
+- var MIN_KARMA_TO_VOTE = 10;
 doctype html
 html.no-js(lang='')
   head
@@ -24,7 +25,7 @@ html.no-js(lang='')
               td(style='vertical-align:top;')
                 .gray-font #{index+1+((pageno-1)*30)}.
               td(style='vertical-align:top;').small
-                if authenticated == true
+                if authenticated == true && user && user.karma >= MIN_KARMA_TO_VOTE || user.role == 'admin'
                   div(class=post.upvotes.indexOf(user._id)!=-1?'upvoted':'', data-oid=post._id,  title='upvote').small.gray-font.upvote-thread &#9650;
                   //a(href='',title='downvote').small.gray-font &#9660;
                   //a(href=post.url||'/thread/'+post._id).marginleft #{post.title}

@@ -1,3 +1,4 @@
+- var MIN_KARMA_TO_VOTE = 10;
 doctype html
 html.no-js(lang='')
   head
@@ -24,7 +25,7 @@ html.no-js(lang='')
               td(style='vertical-align:top;')
                 .gray-font #{index+1+((pageno-1)*30)}. 
               td(style='vertical-align:top').small
-                if authenticated == true
+                if authenticated == true && user && user.karma >= MIN_KARMA_TO_VOTE || user.role == 'admin'
                   .margintop
                     div(class=comment.upvotes.indexOf(user._id)!=-1?'upvoted':'', data-oid=comment._id,  title='upvote').small.gray-font.upvote-comment &#9650;
                     div(class=comment.downvotes.indexOf(user._id)!=-1?'downvoted':'', data-oid=comment._id, title='downvote').small.gray-font.downvote-comment &#9660;

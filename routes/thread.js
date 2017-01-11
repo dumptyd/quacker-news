@@ -1,7 +1,12 @@
 const router = require('express').Router();
-const threadRoute = function (Thread, Comment, User) {
+const MIN_KARMA_TO_POST = 10;
+const threadRoute = function (Thread, Comment, User, recaptcha) {
   router.get('/:id', function (req, res) {
     let id = req.params.id;
+    let recaptchaHTML = false;
+    if(req.isAuthenticated() && req.user.karma < MIN_KARMA_TO_POST && req.user.role != 'admin') {
+      recaptchaHTML = recaptcha.render();
+    }
     Thread.findOne({
       _id: id
     }).populate('author').populate({
@@ -20,7 +25,8 @@ const threadRoute = function (Thread, Comment, User) {
         res.render('thread', {
           authenticated: req.isAuthenticated(),
           thread: thread,
-          user: req.user ? req.user : ''
+          user: req.user ? req.user : '',
+          recaptcha: recaptchaHTML
         });
       }
     });
@@ -36,26 +42,34 @@ const threadRoute = function (Thread, Comment, User) {
     if (!text) {
       return res.redirect('/thread/' + id);
     }
+
     let comment = new Comment({
       author: req.user._id,
       thread: id,
       text: text
     });
-    Thread.findOne({
-      _id: id
-    }, (err, thread) => {
-      if (thread && !err) {
-        comment.save((err, com) => {
-          thread.comments.push(com._id);
-          thread.save((err, doc) => {
-            req.user.comments.push(com._id);
-            req.user.save();
-            res.redirect('/thread/' + id);
-          });
+    recaptcha.verify(req, function (err) {
+      if (!err) {
+        Thread.findOne({
+          _id: id
+        }, (err, thread) => {
+          if (thread && !err) {
+            comment.save((err, com) => {
+              thread.comments.push(com._id);
+              thread.save((err, doc) => {
+                req.user.comments.push(com._id);
+                req.user.save();
+                res.redirect('/thread/' + id);
+              });
+            });
+          }
+          else {
+            res.redirect('/');
+          }
         });
       }
       else {
-        res.redirect('/');
+        return res.redirect('/thread/' + id);
       }
     });
   });

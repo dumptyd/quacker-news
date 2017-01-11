@@ -1,8 +1,12 @@
 const router = require('express').Router();
+const MIN_KARMA_TO_VOTE = 10;
 const commentsRoute = function (isLoggedIn, Comment, User, Thread) {
   router.post('/', isLoggedIn, function (req, res) {
-    if(!(req.body.on && req.body.type &&req.body.itemId)){
-      return res.status(500).end();
+    if(!(req.body.on && req.body.type && req.body.itemId)){
+      return res.status(400).end();
+    }
+    if(req.user.karma < MIN_KARMA_TO_VOTE && req.user.role != 'admin') {
+    	return res.status(403).end();
     }
     let cUserId = req.user._id;
     if(req.body.on=='comment'){
@@ -22,9 +26,12 @@ const commentsRoute = function (isLoggedIn, Comment, User, Thread) {
             comment.upvotes.splice(comment.upvotes.indexOf(cUserId),1);
             comment.upvoteCount = comment.upvoteCount - 1; 
             comment.save();
-            User.update({_id:comment.author}, {$inc: { karma: -1 }}, function(err, changed){ 
+            if (!comment.author.equals(cUserId))
+              User.update({_id:comment.author}, {$inc: { karma: -1 }}, function(err, changed){ 
+                return res.status(200).end();
+              });
+            else
               return res.status(200).end();
-            });
           }
           else { //not upvoted, so upvote
             let incBy = 1;
@@ -36,9 +43,12 @@ const commentsRoute = function (isLoggedIn, Comment, User, Thread) {
               incBy++;
             }
             comment.save();
-            User.update({_id:comment.author}, {$inc: { karma: incBy }}, function(err, changed){  
+            if (!comment.author.equals(cUserId))
+              User.update({_id:comment.author}, {$inc: { karma: incBy }}, function(err, changed){  
+                return res.status(200).end();
+              });
+            else
               return res.status(200).end();
-            });
           }
         }
         else if(req.body.type=='downvote') {
@@ -46,9 +56,12 @@ const commentsRoute = function (isLoggedIn, Comment, User, Thread) {
             comment.downvotes.splice(comment.downvotes.indexOf(cUserId),1);
             comment.downvoteCount = comment.downvoteCount - 1;
             comment.save();
-            User.update({_id:comment.author}, {$inc: { karma: 1 }}, function(err, changed){
+            if (!comment.author.equals(cUserId))
+              User.update({_id:comment.author}, {$inc: { karma: 1 }}, function(err, changed){
+                return res.status(200).end();
+              });
+            else
               return res.status(200).end();
-            });
           }
           else { // not downvoted, so downvote
             let decBy = -1;
@@ -60,9 +73,12 @@ const commentsRoute = function (isLoggedIn, Comment, User, Thread) {
               decBy--;
             }
             comment.save();
-            User.update({_id:comment.author}, {$inc: { karma: decBy }}, function(err, changed){
+            if (!comment.author.equals(cUserId))
+              User.update({_id:comment.author}, {$inc: { karma: decBy }}, function(err, changed){
+                return res.status(200).end();
+              });
+            else
               return res.status(200).end();
-            });
           }
         }
       });
@@ -81,17 +97,23 @@ const commentsRoute = function (isLoggedIn, Comment, User, Thread) {
             thread.upvotes.splice(thread.upvotes.indexOf(cUserId),1);
             thread.upvoteCount = thread.upvoteCount - 1; 
             thread.save();
-            User.update({_id:thread.author}, {$inc: { karma: -1 }}, function(err, changed){ 
+            if (!thread.author.equals(cUserId))
+              User.update({_id:thread.author}, {$inc: { karma: -1 }}, function(err, changed){ 
+                return res.status(200).end();
+              });
+            else
               return res.status(200).end();
-            });
           }
           else { //not upvoted, so upvote
             thread.upvotes.push(cUserId);
             thread.upvoteCount = thread.upvoteCount + 1; 
             thread.save();
-            User.update({_id:thread.author}, {$inc: { karma: 1 }}, function(err, changed){  
+            if (!thread.author.equals(cUserId))
+              User.update({_id:thread.author}, {$inc: { karma: 1 }}, function(err, changed){  
+                return res.status(200).end();
+              });
+            else
               return res.status(200).end();
-            });
           }
         }
       });
